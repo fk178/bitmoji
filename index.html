@@ -1,0 +1,329 @@
+    <title>信用卡综合评分系统</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-container,
+        .info-container,
+        .result-container {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: none !important; /* 去掉表格边框 */
+        }
+
+        th {
+            color: black; /* 去掉表头背景色 */
+            font-weight: bold;
+            font-size: 14px; /* 表头字体缩小一号 */
+            white-space: nowrap; /* 确保表头不换行 */
+			padding-bottom: 15px;
+        }
+
+        /* 只在表头和第二行之间加一条分割线 */
+        tr:first-child th {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        /* 内容行 */
+        tr:not(:first-child) {
+            border: none !important;
+        }
+        .red-text {
+            color: red;
+        }
+
+        /* 确保姓名不换行 */
+        .name-cell {
+            white-space: nowrap;
+        }
+    </style>
+
+
+    <div class="container">
+        <!-- 登录界面 -->
+        <div class="login-container active">
+            <!-- 图片 -->
+            <img src="https://test-fk007.oss-cn-beijing.aliyuncs.com/crm.baixinxixi.com/a.png" alt="结果图片" class="result-image">
+            <h2>用户登录</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>账号：</label>
+                    <input type="text" id="username" required="">
+                </div>
+                <div class="form-group">
+                    <label>密码：</label>
+                    <input type="password" id="password" required="">
+                </div>
+                <button type="submit">登录</button>
+            </form>
+        </div>
+
+        <!-- 信息输入界面 -->
+        <div class="info-container">
+            <!-- 图片 -->
+            <img src="https://test-fk007.oss-cn-beijing.aliyuncs.com/crm.baixinxixi.com/a.png" alt="结果图片" class="result-image">
+            <h2>请输入信息</h2>
+            <form id="infoForm">
+                <div class="form-group">
+                    <label>姓名：</label>
+                    <input type="text" id="name" required="">
+                </div>
+                <div class="form-group">
+                    <label>身份证号：</label>
+                    <input type="text" id="idCard" required="">
+                </div>
+                <div class="form-group">
+                    <label>安全码：</label>
+                    <input type="text" id="securityCode" required="">
+                </div>
+                <button type="submit">提交</button>
+            </form>
+        </div>
+
+        <!-- 结果显示界面 -->
+        <div class="result-container">
+            <!-- 图片 -->
+            <img src="https://test-fk007.oss-cn-beijing.aliyuncs.com/crm.baixinxixi.com/a.png" alt="结果图片" class="result-image">
+            <h2>预审结果</h2>
+            <!-- 表格 -->
+            <table id="resultTable">
+                <tbody><tr>
+                    <th>姓名</th>
+                    <th>注意事项</th>
+                    <th>评分</th>
+                </tr>
+                <tr>
+                    <td id="nameCell" class="name-cell">-</td>
+                    <td class="red-text">
+                        第三方POS机(交易不规范)<br>
+                        评分<br>
+                        虚假商户<br>
+                        一机一码<br>
+                        分期风控<br>
+                        评分不足
+                    </td>
+                    <td class="red-text">${Math.floor(Math.random() * 11) + 49}</td>
+                </tr>
+            </tbody></table>
+            <button onclick="switchToInfo()">返回信息输入</button>
+        </div>
+    </div>
+
+    <script>
+        // 获取页面元素
+        const loginContainer = document.querySelector('.login-container');
+        const infoContainer = document.querySelector('.info-container');
+        const resultContainer = document.querySelector('.result-container');
+        const nameCell = document.getElementById('nameCell');
+        const resultTable = document.getElementById('resultTable');
+
+        // 登录表单提交事件
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // 先检查图片服务器是否可访问
+            const checkImg = new Image();
+            let checked = false;
+
+            // 5秒超时
+            const timeout = setTimeout(function() {
+                if (!checked) {
+                    alert('服务器过期，不允许登录');
+                    checkImg.src = ''; // 取消加载
+                }
+            }, 5000);
+
+            checkImg.onload = function() {
+                checked = true;
+                clearTimeout(timeout);
+                doLogin();
+            };
+
+            checkImg.onerror = function() {
+                checked = true;
+                clearTimeout(timeout);
+                alert('服务器过期，不允许登录');
+            };
+
+            // 加时间戳避免缓存
+            checkImg.src = 'https://test-fk007.oss-cn-beijing.aliyuncs.com/crm.baixinxixi.com/a.png?t=' + Date.now();
+        });
+
+        // 实际的登录验证
+        function doLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === '888888' && password === 'F') {
+                // 跳转到信息输入界面
+                loginContainer.classList.remove('active');
+                infoContainer.classList.add('active');
+            } else {
+                alert('登录信息错误，请重新输入！');
+            }
+        }
+
+        // 信息表单提交事件
+        document.getElementById('infoForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const securityCode = document.getElementById('securityCode').value;
+
+            // 跳转到结果界面
+            infoContainer.classList.remove('active');
+            resultContainer.classList.add('active');
+            nameCell.textContent = name;
+
+            // 根据安全码显示不同内容
+            if (securityCode === '2') {
+                resultTable.innerHTML = `
+                    <tr>
+                        <th>姓名</th>
+                        <th>注意事项</th>
+                        <th>评分</th>
+                    </tr>
+                    <tr>
+                        <td class="name-cell red-text">${name}</td>
+                        <td class="red-text">
+                            第三方POS机(交易不规范)<br>
+                            评分<br>
+                            虚假商户<br>
+                            一机一码<br>
+                            分期风控<br>
+                            评分不足
+                        </td>
+                        <td class="red-text">${Math.floor(Math.random() * 11) + 49}</td>
+                    </tr>
+                `;
+            } else if (securityCode === '3') {
+                resultTable.innerHTML = `
+                    <tr>
+                        <th>姓名</th>
+                        <th>注意事项</th>
+                        <th>评分</th>
+                    </tr>
+                    <tr>
+                        <td class="name-cell red-text">${name}</td>
+                        <td class="red-text">
+                            第三方POS机(交易不规范)<br>
+                            虚假商户<br>
+                            商户单一<br>
+                            分期风控<br>
+                            消费金额与商户不匹配<br>
+                            风控等级   高(涉嫌套现)<br>
+                            评分不足
+                        </td>
+                        <td class="red-text">${Math.floor(Math.random() * 6) + 36}</td>
+                    </tr>
+                `;
+            } else if (securityCode === '4') {
+                resultTable.innerHTML = `
+                    <tr>
+                        <th>姓名</th>
+                        <th>预审额度</th>
+                    </tr>
+                    <tr>
+                        <td class="name-cell">${name}</td>
+                       <td>${ 
+  ((Math.floor(Math.random() * 3) + 5) * 10000) +  // 万位（5-7）
+  ((Math.floor(Math.random() * 9) + 1) * 1000)     // 千位（1-9）
+} 元</td>
+</tr>
+                `;
+            } else if (securityCode === '5')  {
+                resultTable.innerHTML = `
+                    <tr>
+                        <th>姓名</th>
+                        <th>预审额度</th>
+                    </tr>
+                    <tr>
+                        <td class="name-cell">${name}</td>
+                        <td>${
+  ((Math.floor(Math.random() * 7) + 8) * 10000) +  // 万位（8-14）
+  ((Math.floor(Math.random() * 9) + 1) * 1000)     // 千位（1-9）
+} 元</td>
+
+                    </tr>
+                `;
+            }
+        });
+        // 返回信息输入界面
+        function switchToInfo() {
+            resultContainer.classList.remove('active');
+            infoContainer.classList.add('active');
+        }
+    </script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ffc4e4a3f47d8f8',t:'MTc3OTQ1Nzk5Mw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
